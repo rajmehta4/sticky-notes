@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sticky Notes</title>
+    <link rel="stylesheet" type="text/css" href="../../css/main.css" />
+    <link href="https://fonts.googleapis.com/css?family=Amatic+SC|Open+Sans" rel="stylesheet">
+    <script src="../../js/react.min.js"></script>
+    <script src="../../js/react-dom.min.js"></script>
+    <script src="../../js/browser.min.js"></script>
+</head>
+<body>
+
+    <div id="container"></div>
+
+    <script type="text/babel">
+
+        
+        var Note = React.createClass({
+
+            getInitialState: function() {
+                return {editing: false}
+            },
+
+            edit: function() {
+                this.setState({editing: true});
+            },
+
+            save: function() {
+                var val = this.refs.newNote.value;
+                this.setState({editing: false});
+                this.props.updateNoteText(val, this.props.index);
+            },
+
+            remove: function() {
+                var ans = confirm("Are you sure you want to remove the note?");
+                if(ans == true) {
+                    this.props.removeFromBoard(this.props.index);
+                }
+            },
+
+            renderNormal: function() {
+                return(
+
+                    <div className="noteContainer">
+                        <div className="noteText">{this.props.children}</div>
+                        <button onClick={this.edit} className="button-primary">Edit</button>
+                        <button onClick={this.remove} className="button-danger">Remove</button>
+                    </div>
+
+                );
+            },
+
+            renderForm: function() {
+                return(
+
+                    <div className="noteContainer">
+                        <textarea ref="newNote" defaultValue={this.props.children}></textarea>
+                        <button onClick={this.save} className="button-success">Save</button>
+                    </div>
+
+                );
+            },
+
+            render: function() {
+
+                if(this.state.editing) {
+                    return this.renderForm();
+                }
+                else {
+                    return this.renderNormal();
+                }
+            }
+
+        });
+
+        var Board = React.createClass({
+
+            getInitialState: function() {
+                return {
+                    notes: ['This is a note']
+                }
+            },
+
+            add: function () {
+
+                var note = prompt("Type a new note");
+                console.log(note);
+
+                if(note && note != '') {
+                    var arr = this.state.notes;
+                    arr.push(note);
+                    this.setState({notes: arr});
+                }
+
+                else if(note == '') {
+                    alert("You didn't enter anything. Try again?");
+                }
+                
+            },
+
+            removeNote: function (i) {
+                var arr = this.state.notes;
+                arr.splice(i, 1);
+                this.setState({notes: arr});
+            },
+
+            updateNote: function (newNote, i) {
+                var arr = this.state.notes;
+                arr[i] = newNote;
+                this.setState({notes: arr});
+            },
+
+            eachNote: function(note, i) {
+                return (
+                    <Note key={i} index={i} updateNoteText={this.updateNote} removeFromBoard={this.removeNote}>
+                        {note}
+                    </Note>
+                );
+            },
+
+            render: function() {
+                return (
+                    <div>
+                        <div className="heading">
+                            <h1>Sticky Notes</h1>
+                        </div>
+
+                        <div className="board">
+                            {this.state.notes.map(this.eachNote)}    
+                        </div>
+
+                        <div className="buttonWrapper">
+                            <button onClick={this.add} className="button-info create">Add New Note</button>
+                        </div>
+                    </div>
+
+                );
+            }
+
+        });
+
+        ReactDOM.render(<Board />, document.getElementById('container'));
+
+    </script>
+
+</body>
+</html>
